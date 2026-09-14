@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main  # Triggers the workflow when code is pushed to the main branch
+      - master  # Triggers the workflow when code is pushed to the main branch
 
 env:
   REGISTRY: ghcr.io
