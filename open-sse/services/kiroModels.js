@@ -257,7 +257,9 @@ export async function resolveKiroModels(credentials, options = {}) {
       const refreshed = await refreshKiroToken(
         credentials.refreshToken,
         credentials.providerSpecificData,
-        options.log
+        options.log,
+        null,
+        credentials
       );
       if (refreshed?.accessToken) {
         const next = { ...credentials, ...refreshed };

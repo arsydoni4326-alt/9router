@@ -323,7 +323,19 @@ async function resolveKiroProfileArnPatch(providerSpecificData, accessToken, ref
   return profileArn ? { providerSpecificData: { profileArn } } : {};
 }
 
-export async function refreshKiroToken(refreshToken, providerSpecificData, log, proxyOptions = null) {
+/**
+ * Human-readable identity for Kiro token-refresh logs: "Name <email>".
+ * Falls back to whichever field is present; "unknown account" when neither is.
+ * (Kiro connections usually carry only `email`; `name`/`displayName` when set.)
+ */
+export function formatKiroAccountLabel(account) {
+  const name = account?.name?.trim?.() || account?.displayName?.trim?.() || "";
+  const email = account?.email?.trim?.() || "";
+  if (name && email) return `${name} <${email}>`;
+  return name || email || "unknown account";
+}
+
+export async function refreshKiroToken(refreshToken, providerSpecificData, log, proxyOptions = null, account = null) {
   if (!refreshToken) return null;
   return dedupRefresh("kiro", refreshToken, async () => {
   const authMethod = providerSpecificData?.authMethod;
@@ -432,7 +444,7 @@ export async function refreshKiroToken(refreshToken, providerSpecificData, log, 
 
   if (!response.ok) {
     const errorText = await response.text();
-    log?.error?.("TOKEN_REFRESH", "Failed to refresh Kiro social token", {
+    log?.error?.("TOKEN_REFRESH", `Failed to refresh Kiro social token for account: ${formatKiroAccountLabel(account)}`, {
       status: response.status,
       error: errorText,
     });
