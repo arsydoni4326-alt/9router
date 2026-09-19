@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Modal, Button } from "@/shared/components";
+// uuid's v4 works in insecure contexts (plain-HTTP LAN access), where Web Crypto's
+// crypto.randomUUID is undefined and threw "crypto.randomUUID is not a function".
+import { generateId } from "@/shared/utils";
 
 /**
  * Xiaomi MiMo Auth Modal
@@ -90,7 +93,7 @@ export default function XiaomiMimoAuthModal({ isOpen, onSuccess, onClose }) {
   const handleStartOAuth = async () => {
     setError(null);
     try {
-      const state = crypto.randomUUID();
+      const state = generateId();
       const res = await fetch(`/api/oauth/xiaomi-mimo/authorize?state=${state}`);
       const data = await res.json();
       if (data.authorizeUrl) {
