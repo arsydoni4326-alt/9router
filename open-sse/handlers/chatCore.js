@@ -420,7 +420,7 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
   const executeWithPoolFallback = async (attempt = 0) => {
     let result;
     try {
-      result = await executor.execute({ model, body: translatedBody, stream, credentials, signal: streamController.signal, log, proxyOptions });
+      result = await executor.execute({ model, body: translatedBody, stream, credentials, providerSessionId: sessionSeed, clientTool, signal: streamController.signal, log, proxyOptions });
     } catch (error) {
       if (error?.poolScoped && typeof resolveProxyConfig === "function" && attempt < MAX_POOL_RETRIES) {
         if (await tryNextPool(error.poolScoped, error.message)) return executeWithPoolFallback(attempt + 1);
