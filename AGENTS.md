@@ -133,7 +133,33 @@ re-verify after.
 
 ---
 
-## 6. Upstream sync procedure
+## 6. Kiro token-refresh failure logs must name the account
+
+**DO NOT** revert `refreshKiroToken` in
+`open-sse/services/tokenRefresh/providers.js` to a bare
+`"Failed to refresh Kiro social token"` message. The log line MUST include the
+account identity via `formatKiroAccountLabel(account)`
+(e.g. `... for account: Denny <denny@example.com>`), and the `account`
+parameter (last arg) must keep being threaded from every call site:
+`open-sse/services/tokenRefresh.js` (`REFRESH_HANDLERS.kiro` — passes the
+connection record `c`), `open-sse/executors/kiro.js` `refreshCredentials`
+(passes `credentials`), `open-sse/services/kiroModels.js` (passes
+`credentials`), and `src/sse/services/tokenRefresh.js` re-export.
+
+**DO NOT** remove `formatKiroAccountLabel` or its `name` → `displayName` →
+`email` → `"unknown account"` fallback.
+
+**WHY:** With multiple Kiro accounts connected, a provider-only failure message
+gives the user no way to tell which connection to re-authenticate. Kiro
+connections store identity on the connection record (`email`, `name` /
+`displayName` — NOT inside `providerSpecificData`), which is why the identity is
+threaded as a parameter instead of being derivable from the refresh token.
+
+**Covered by:** `tests/unit/kiro-social-refresh-log.test.js`.
+
+---
+
+## 7. Upstream sync procedure
 
 - Remote layout: `origin` = this fork, `upstream` = `decolua/9router`.
 - **Merge, do not rebase** — the fork already has merge-based history; rebasing
@@ -152,7 +178,7 @@ re-verify after.
 
 ---
 
-## 7. Do not re-add `package-lock.json` to `.gitignore`
+## 8. Do not re-add `package-lock.json` to `.gitignore`
 
 **WHY:** Upstream does not track a lockfile, but this fork **must** — the
 Docker build depends on `npm ci` against a committed, npm-10-compatible

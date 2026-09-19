@@ -53,8 +53,8 @@ export const refreshGitHubToken = (refreshToken) =>
 export const refreshCopilotToken = (githubAccessToken) =>
   _refreshCopilotToken(githubAccessToken, log);
 
-export const refreshKiroToken = (refreshToken, providerSpecificData) =>
-  _refreshKiroToken(refreshToken, providerSpecificData, log);
+export const refreshKiroToken = (refreshToken, providerSpecificData, account) =>
+  _refreshKiroToken(refreshToken, providerSpecificData, log, null, account);
 
 export const getAccessToken = (provider, credentials) =>
   _getAccessToken(provider, credentials, log);
