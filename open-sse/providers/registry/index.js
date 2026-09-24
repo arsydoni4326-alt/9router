@@ -69,6 +69,7 @@ import p66 from "./ollama-local.js";
 import p67 from "./ollama.js";
 import p68 from "./openai.js";
 import p69 from "./opencode-go.js";
+import p68z from "./opencode-zen.js";
 import p70 from "./opencode.js";
 import p71 from "./openrouter.js";
 import p72 from "./perplexity-web.js";
@@ -76,6 +77,7 @@ import p73 from "./perplexity.js";
 import p74 from "./perplexity-agent.js";
 import p75 from "./playht.js";
 import p76 from "./qoder.js";
+import p124 from "./qoder-cn.js";
 import p77 from "./recraft.js";
 import p78 from "./runwayml.js";
 import p79 from "./sdwebui.js";
@@ -193,6 +195,7 @@ export default [
   p66,
   p67,
   p68,
+  p68z,
   p69,
   p70,
   p71,
@@ -201,6 +204,7 @@ export default [
   p74,
   p75,
   p76,
+  p124,
   p77,
   p78,
   p79,
