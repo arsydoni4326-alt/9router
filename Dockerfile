@@ -1,32 +1,48 @@
 # syntax=docker/dockerfile:1.7
-# Minimal two-stage, Node-only image. Bun is not used anywhere at runtime: the DB
-# driver chain runs better-sqlite3 → node:sqlite (Node >= 22.5) → sql.js under Node.
-FROM node:22-alpine AS builder
+# Pinned by digest so a base-image refresh cannot silently bump npm and break
+# `npm ci` against the committed lockfile (see v1.0.9 npm ci EUSAGE failure).
+# DO NOT unpin. This image ships npm 10.9.8 — the lockfile MUST be regenerated
+# with npm 10 (`npx -y npm@10.9.8 install --package-lock-only`), never npm 11+.
+# See AGENTS.md §1 and scripts/verify-lockfile-npm10.mjs.
+ARG NODE_IMAGE=node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+ARG ALPINE_MIRROR=dl-cdn.alpinelinux.org
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+ARG APP_VERSION=unknown
+
+FROM ${NODE_IMAGE} AS base
+ARG ALPINE_MIRROR
 WORKDIR /app
 
-# Install deps first for layer caching. Native build tools are NOT required:
-# better-sqlite3 is an optionalDependency with musl prebuilds (skipped when
-# unavailable — sql.js / node:sqlite fall back at runtime); everything else ships
-# musl prebuilds or WASM.
+# Use the official Alpine mirror by default. A repository variable/build arg can
+# override it for environments that require a regional mirror.
+RUN if [ "$ALPINE_MIRROR" != "dl-cdn.alpinelinux.org" ]; then \
+      sed -i "s|dl-cdn.alpinelinux.org|${ALPINE_MIRROR}|g" /etc/apk/repositories; \
+    fi
+
+FROM base AS builder
+ARG NPM_REGISTRY
+
+RUN apk add --no-cache python3 make g++ linux-headers
+
 COPY package.json package-lock.json ./
 # Fail fast with an actionable message if the lockfile was regenerated with
 # npm 11+ (drops the top-level @emnapi entries npm 10 requires). Without this,
 # `npm ci` still fails but with a cryptic "Missing: @emnapi/..." EUSAGE error.
 RUN node -e "const l=require('./package-lock.json');const p=l.packages||{};const miss=['node_modules/@emnapi/core','node_modules/@emnapi/runtime'].filter(k=>!p[k]);if(miss.length){console.error('LOCKFILE NOT npm-10-COMPATIBLE — missing: '+miss.join(', '));console.error('Regenerate with: npx -y npm@10.9.8 install --package-lock-only');console.error('See AGENTS.md §1.');process.exit(1)}"
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci \
-      --registry="${NPM_REGISTRY}" \
-      --fetch-retries=5 \
-      --fetch-retry-factor=2 \
-      --fetch-retry-mintimeout=10000 \
-      --fetch-retry-maxtimeout=120000 \
-      --fetch-timeout=300000ci
+  npm ci \
+    --registry="${NPM_REGISTRY}" \
+    --fetch-retries=5 \
+    --fetch-retry-factor=2 \
+    --fetch-retry-mintimeout=10000 \
+    --fetch-retry-maxtimeout=120000 \
+    --fetch-timeout=300000
 
 COPY . ./
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22-alpine AS runner
+FROM ${NODE_IMAGE} AS runner
 ARG ALPINE_MIRROR
 ARG APP_VERSION
 WORKDIR /app
@@ -48,16 +64,18 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/custom-server.js ./custom-server.js
-# Next file tracing can omit sibling files; MITM runs server.js as a separate process.
 COPY --from=builder /app/open-sse ./open-sse
+# Next file tracing can omit sibling files; MITM runs server.js as a separate process.
 COPY --from=builder /app/src/mitm ./src/mitm
-# node-forge may be omitted by tracing (MITM child process); node-machine-id is
-# createRequire-loaded at runtime. Both are copied explicitly.
+# Standalone node_modules may omit deps only required by the MITM child process.
 COPY --from=builder /app/node_modules/node-forge ./node_modules/node-forge
-COPY --from=builder /app/node_modules/node-machine-id ./node_modules/node-machine-id
-# sql.js loads dist/sql-wasm.wasm by path at runtime; tracing only follows JS
-# imports, so copy the full package or the last-resort DB driver aborts with ENOENT.
+# Ensure `next` is available at runtime in case tracing did not include it.
+COPY --from=builder /app/node_modules/next ./node_modules/next
+# sql.js loads dist/sql-wasm.wasm by path at runtime; tracing only follows JS imports,
+# so the last-resort DB driver would abort with ENOENT on the missing binary.
 COPY --from=builder /app/node_modules/sql.js ./node_modules/sql.js
+# node-machine-id is createRequire-loaded at runtime; tracing omits it.
+COPY --from=builder /app/node_modules/node-machine-id ./node_modules/node-machine-id
 
 RUN mkdir -p /app/data && chown -R node:node /app && \
   mkdir -p /app/data-home && chown node:node /app/data-home && \
@@ -75,4 +93,5 @@ EXPOSE 20128
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:20128/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "custom-server.js"]
