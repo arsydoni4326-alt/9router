@@ -33,50 +33,50 @@ import p30 from "./fal-ai.js";
 import p31 from "./featherless.js";
 import p32 from "./firecrawl.js";
 import p33 from "./fireworks.js";
-import p34 from "./gemini-cli.js";
-import p35 from "./gemini.js";
-import p36 from "./github.js";
-import p37 from "./gitlab.js";
-import p38 from "./glm-cn.js";
-import p39 from "./glm.js";
-import p40 from "./google-pse.js";
-import p41 from "./google-tts.js";
-import p42 from "./grok-cli.js";
-import p43 from "./grok-web.js";
-import p44 from "./groq.js";
-import p45 from "./huggingface.js";
-import p46 from "./hyperbolic.js";
-import p47 from "./iflow.js";
-import p48 from "./inworld.js";
-import p49 from "./jina-ai.js";
-import p50 from "./jina-reader.js";
-import p51 from "./kilocode.js";
-import p52 from "./kimchi.js";
-import p53 from "./kimi.js";
-import p54 from "./kiro.js";
-import p55 from "./linkup.js";
-import p56 from "./local-device.js";
-import p57 from "./mimo-free.js";
-import p58 from "./minimax-cn.js";
-import p59 from "./minimax.js";
-import p60 from "./mistral.js";
-import p61 from "./mmf.js";
-import p62 from "./nanobanana.js";
-import p63 from "./nebius.js";
-import p64 from "./nvidia.js";
-import p65 from "./ollama-local.js";
-import p66 from "./ollama.js";
-import p123 from "./ollama-search.js";
-import p67 from "./openai.js";
-import p68 from "./opencode-go.js";
+import p34 from "./freebuff.js";
+import p35 from "./gemini-cli.js";
+import p36 from "./gemini.js";
+import p37 from "./github.js";
+import p38 from "./gitlab.js";
+import p39 from "./glm-cn.js";
+import p40 from "./glm.js";
+import p41 from "./google-pse.js";
+import p42 from "./google-tts.js";
+import p43 from "./grok-cli.js";
+import p44 from "./grok-web.js";
+import p45 from "./groq.js";
+import p46 from "./huggingface.js";
+import p47 from "./hyperbolic.js";
+import p48 from "./iflow.js";
+import p49 from "./inworld.js";
+import p50 from "./jina-ai.js";
+import p51 from "./jina-reader.js";
+import p52 from "./kilocode.js";
+import p53 from "./kimchi.js";
+import p54 from "./kimi.js";
+import p55 from "./kiro.js";
+import p56 from "./linkup.js";
+import p57 from "./local-device.js";
+import p58 from "./mimo-free.js";
+import p59 from "./minimax-cn.js";
+import p60 from "./minimax.js";
+import p61 from "./mistral.js";
+import p62 from "./mmf.js";
+import p63 from "./nanobanana.js";
+import p64 from "./nebius.js";
+import p65 from "./nvidia.js";
+import p66 from "./ollama-local.js";
+import p67 from "./ollama.js";
+import p68 from "./openai.js";
+import p69 from "./opencode-go.js";
 import p68z from "./opencode-zen.js";
-import p69 from "./opencode.js";
-import p70 from "./openrouter.js";
-import p71 from "./perplexity-web.js";
-import p72 from "./perplexity.js";
-import p73 from "./perplexity-agent.js";
-import p74 from "./playht.js";
-import p75 from "./qoder.js";
+import p70 from "./opencode.js";
+import p71 from "./openrouter.js";
+import p72 from "./perplexity-web.js";
+import p73 from "./perplexity.js";
+import p74 from "./perplexity-agent.js";
+import p75 from "./playht.js";
+import p76 from "./qoder.js";
 import p124 from "./qoder-cn.js";
 import p77 from "./recraft.js";
 import p78 from "./runwayml.js";
@@ -193,8 +193,6 @@ export default [
   p64,
   p65,
   p66,
-  p123,
-  p124,
   p67,
   p68,
   p68z,
@@ -206,6 +204,7 @@ export default [
   p74,
   p75,
   p76,
+  p124,
   p77,
   p78,
   p79,
